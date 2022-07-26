@@ -1,0 +1,11 @@
+{
+  "target_overrides": {
+    "*": {
+      "platform.stdio-buffered-serial": true,
+      "platform.stdio-baud-rate": 230400,
+      "platform.stdio-convert-newlines": true,
+      "platform.fatal-error-auto-reboot-enabled": true,
+      "target.printf_lib": "std"
+    }
+  }
+}

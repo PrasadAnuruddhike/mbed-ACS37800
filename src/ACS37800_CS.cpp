@@ -8,12 +8,12 @@ ACS37800::ACS37800(I2C *i2c)
 
 //Start I2C communication using the specified port
 //Returns true if successful or false if no sensor detected
-// bool ACS37800::begin(uint8_t address, I2C *i2c)
-// {
-//     _ACS37800Address = address;
-//     _i2c = i2c;
+bool ACS37800::begin(int address)
+{
+    _ACS37800Address = address << 1;
 
-// }
+    return true;
+}
 
 //Read a register's contents. Contents are returned in data.
 ACS37800ERR ACS37800::readRegister(uint32_t *value, uint8_t address)
@@ -191,6 +191,9 @@ ACS37800ERR ACS37800::getCurrentCoarseGain(float *currentCoarseGain)
 
     float gain = ACS37800_CRS_SNS_GAINS[store.data.bits.crs_sns];
 
+    uint32_t iavgselen = store.data.bits.iavgselen;
+    printf("i avg selection bit: %d\r\n", iavgselen);
+
     //Return the gain
     *currentCoarseGain = gain; 
 
@@ -283,4 +286,205 @@ void ACS37800::setDividerRes(float newRes)
 void ACS37800::setCurrentRange(float newCurrent)
 {
     _currentSensingRange = newCurrent;
+}
+
+
+
+ACS37800ERR ACS37800::setCurrentCoarseGain(uint32_t currentCoarseGain, bool _eeprom)
+{
+    // Set the customer access code
+    ACS37800ERR error = writeRegister(ACS37800_CUSTOMER_ACCESS_CODE, ACS37800_REGISTER_VOLATILE_2F);
+
+    ACS37800_REGISTER_0B_t store;
+
+    // Read register 1B
+    error = readRegister(&store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    store.data.bits.crs_sns = currentCoarseGain;
+
+    printf("readGain: %d actual gain: %f\r\n", store.data.bits.crs_sns, ACS37800_CRS_SNS_GAINS[currentCoarseGain]);
+
+    // Write register 1B
+    error = writeRegister(store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    // Check if user wants to set eeprom too
+    if(_eeprom)
+    {
+        // Read register 0B
+        error = readRegister(&store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+
+        store.data.bits.crs_sns = ACS37800_CRS_SNS_GAINS[currentCoarseGain];
+
+        // Write register 0B
+        error = writeRegister(store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+    }
+
+    // Clear the customer access code
+    error = writeRegister(0, ACS37800_REGISTER_VOLATILE_2F);
+    ThisThread::sleep_for(100ms);
+
+    return (error);
+}
+
+
+ACS37800ERR ACS37800::setCurrentAvgSelection(bool currentAvgSelection, bool _eeprom)
+{
+    // Set the customer access code
+    ACS37800ERR error = writeRegister(ACS37800_CUSTOMER_ACCESS_CODE, ACS37800_REGISTER_VOLATILE_2F);
+
+    ACS37800_REGISTER_0B_t store;
+
+    // Read register 1B
+    error = readRegister(&store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    //set current avg selection
+    if (currentAvgSelection) 
+    {
+        store.data.bits.iavgselen = 1;
+    }
+    else
+    {
+        store.data.bits.iavgselen = 0;
+    }
+
+    // Write register 1B
+    error = writeRegister(store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+    printf("Error: %d set iavg sel: %d \r\n", error, store.data.bits.iavgselen);
+
+    // Check if user wants to set eeprom too
+    if(_eeprom)
+    {
+        // Read register 0B
+        error = readRegister(&store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+
+        //set current avg selection
+        if (currentAvgSelection) 
+        {
+            store.data.bits.iavgselen = 1;
+        }
+        else
+        {
+            store.data.bits.iavgselen = 0;
+        }
+
+        // Write register 0B
+        error = writeRegister(store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+    }
+
+    // Clear the customer access code
+    error = writeRegister(0, ACS37800_REGISTER_VOLATILE_2F);
+    ThisThread::sleep_for(100ms);
+
+    return (error);
+}
+
+
+ACS37800ERR ACS37800::setRMSavg(uint32_t rms_avg_1, uint32_t rms_avg_2, bool _eeprom)
+{
+    // Set the customer access code
+    ACS37800ERR error = writeRegister(ACS37800_CUSTOMER_ACCESS_CODE, ACS37800_REGISTER_VOLATILE_2F);
+
+    ACS37800_REGISTER_0C_t store;
+
+    // Read register 1C
+    error = readRegister(&store.data.all, ACS37800_REGISTER_SHADOW_1C); 
+
+    store.data.bits.rms_avg_1 = rms_avg_1;
+    store.data.bits.rms_avg_2 = rms_avg_2;
+
+    // Write register 1C
+    error = writeRegister(store.data.all, ACS37800_REGISTER_SHADOW_1C); 
+
+    // Check if user wants to set eeprom too
+    if(_eeprom)
+    {
+        // Read register 0C
+        error = readRegister(&store.data.all, ACS37800_REGISTER_EEPROM_0C); 
+
+        store.data.bits.rms_avg_1 = rms_avg_1;
+        store.data.bits.rms_avg_2 = rms_avg_2;
+
+        // Write register 0C
+        error = writeRegister(store.data.all, ACS37800_REGISTER_EEPROM_0C); 
+    }
+
+    // Clear the customer access code
+    error = writeRegister(0, ACS37800_REGISTER_VOLATILE_2F);
+    ThisThread::sleep_for(100ms);
+
+    return (error);
+}
+
+
+ACS37800ERR ACS37800::setQvoFine(uint32_t qvo_fine, bool _eeprom)
+{
+    // Set the customer access code
+    ACS37800ERR error = writeRegister(ACS37800_CUSTOMER_ACCESS_CODE, ACS37800_REGISTER_VOLATILE_2F);
+
+    ACS37800_REGISTER_0B_t store;
+
+    // Read register 1B
+    error = readRegister(&store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    store.data.bits.qvo_fine = qvo_fine;
+
+    // Write register 1B
+    error = writeRegister(store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    // Check if user wants to set eeprom too
+    if(_eeprom)
+    {
+        // Read register 0B
+        error = readRegister(&store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+
+        store.data.bits.qvo_fine = qvo_fine;
+
+        // Write register 0B
+        error = writeRegister(store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+    }
+
+    // Clear the customer access code
+    error = writeRegister(0, ACS37800_REGISTER_VOLATILE_2F);
+    ThisThread::sleep_for(100ms);
+
+    return (error);
+}
+
+ACS37800ERR ACS37800::setSnsFine(uint32_t sns_fine, bool _eeprom)
+{
+    // Set the customer access code
+    ACS37800ERR error = writeRegister(ACS37800_CUSTOMER_ACCESS_CODE, ACS37800_REGISTER_VOLATILE_2F);
+
+    ACS37800_REGISTER_0B_t store;
+
+    // Read register 1B
+    error = readRegister(&store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    store.data.bits.sns_fine = sns_fine;
+
+    // Write register 1B
+    error = writeRegister(store.data.all, ACS37800_REGISTER_SHADOW_1B); 
+
+    // Check if user wants to set eeprom too
+    if(_eeprom)
+    {
+        // Read register 0B
+        error = readRegister(&store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+
+        store.data.bits.sns_fine = sns_fine;
+
+        // Write register 0B
+        error = writeRegister(store.data.all, ACS37800_REGISTER_EEPROM_0B); 
+    }
+
+    // Clear the customer access code
+    error = writeRegister(0, ACS37800_REGISTER_VOLATILE_2F);
+    ThisThread::sleep_for(100ms);
+
+    return (error);
+}
+
+void ACS37800::calibrateSensor()
+{
+
 }

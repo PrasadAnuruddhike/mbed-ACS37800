@@ -17,7 +17,7 @@ const float ACS37800_DEFAULT_DIVIDER_RES = 2000000;
 //Default current-sensing range
 //ACS37800KMACTR-030B3-I2C is a 30.0 Amp part - as used on the SparkFun Qwiic Power Meter
 //ACS37800KMACTR-090B3-I2C is a 90.0 Amp part
-const float ACS37800_DEFAULT_CURRENT_RANGE = 30;
+const float ACS37800_DEFAULT_CURRENT_RANGE = 90;
 
 //Error result
 typedef enum {
@@ -360,7 +360,8 @@ class ACS37800
         ACS37800(I2C *i2c);
 
         //Start I2C communication using specified address
-        bool begin(uint8_t address, I2C *i2c);
+        // bool begin(uint8_t address, I2C *i2c);
+        bool begin(int address);
 
         //Basic methods for accessing registers
         ACS37800ERR readRegister(uint32_t *value, uint8_t address);
@@ -388,6 +389,16 @@ class ACS37800
         void setSenseRes(float newRes); // Change the value of _senseResistance (Ohms)
         void setDividerRes(float newRes); // Change the value of _dividerResistance (Ohms)
         void setCurrentRange(float newCurrent); // Change the value of _currentSensingRange (Amps)
+
+        ACS37800ERR setCurrentCoarseGain(uint32_t currentCoarseGain, bool _eeprom = false);
+        ACS37800ERR setCurrentAvgSelection(bool currentAvgSelection, bool _eeprom = false);
+
+        ACS37800ERR setRMSavg(uint32_t rms_avg_1, uint32_t rms_avg_2, bool _eeprom = false);
+        ACS37800ERR setQvoFine(uint32_t qvo_fine, bool _eeprom = false);
+        ACS37800ERR setSnsFine(uint32_t sns_fine, bool _eeprom = false);
+
+        void getFactorySettings();
+        void calibrateSensor();
     
     private:
         I2C *_i2c;

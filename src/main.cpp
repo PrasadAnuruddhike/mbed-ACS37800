@@ -18,6 +18,7 @@
 #define CS3_ADDRESS   0x6A   
 
 I2C i2c(I2C_SDA, I2C_SCL);
+ACS37800 current_ch_1(&i2c);
 ACS37800 current_ch_2(&i2c);
 ACS37800 current_ch_3(&i2c);
 
@@ -339,6 +340,8 @@ int main() {
   wait_us(2000000);  
   // put your setup code here, to run once:
   printf("ACS37800 TEST \n");
+
+  current_ch_1.begin(CS1_ADDRESS);
   current_ch_2.begin(CS2_ADDRESS);
   current_ch_3.begin(CS3_ADDRESS);
 
@@ -393,35 +396,59 @@ int main() {
   // current_ch_2.getCurrentCoarseGain(&coarse_gain);
   // read_EEPROM();
 
-  read_EEPROM_Config_1G();
-  read_SHADOW_Config_1G();
+  // read_EEPROM_Config_1G();
+  // read_SHADOW_Config_1G();
   
-  uint32_t rms_avg_1    = 124;
-  uint32_t rms_avg_2    = 512;
-  uint32_t course_gain  = 0;   // 3 --> x3.5
-  uint32_t qvo_fine     = 0;   // 25 --> 0x19
-  uint32_t sns_fine     = 0;  //  182 --> 0xB6
-  uint32_t n_samples    = 512;
+  // current_ch_3.getFactorySettings();
+  // printf("****************************** CS_1 *************************************************\n");
+  // current_ch_1.getEEPROMSettings();
+  // current_ch_1.getShadowSettings();
 
-  current_ch_3.setNumberOfSamples(n_samples, false);
-  current_ch_3.setBypassNenable(true, false);
+  // printf("\n****************************** CS_2 *************************************************\n");
+  // current_ch_2.getEEPROMSettings();
+  // current_ch_2.getShadowSettings();
 
-  current_ch_3.setCurrentAvgSelection(true, false);
-  current_ch_3.setRMSavg(rms_avg_1, rms_avg_2, false);
-  current_ch_3.setCurrentCoarseGain(course_gain, false);
-  current_ch_3.setQvoFine(qvo_fine, false);
-  current_ch_3.setSnsFine(sns_fine, false);
+  // printf("\n****************************** CS_3 *************************************************\n");
+  // current_ch_3.getEEPROMSettings();
+  // current_ch_3.getShadowSettings();
 
-  read_SHADOW_Config_1G();
 
-  printf("----------------  Settings  ----------------\r\n");
-  printf("N Samples       :   %ld\n", n_samples);
-  printf("Course Gain     :   %ld\n", course_gain);
-  printf("QVO FINE        :   %ld\n", qvo_fine);
-  printf("SNS FINE        :   %ld\n", sns_fine);
-  printf("RMS AVG 1       :   %ld\n", rms_avg_1);
-  printf("--------------------------------------------\r\n");
-  printf("When rms avg 1 : %ld\r\n", rms_avg_1);
+  // uint32_t rms_avg_1    = 124;
+  // uint32_t rms_avg_2    = 512;
+  // uint32_t course_gain  = 6;   // 3 --> x3.5
+  // uint32_t qvo_fine     = 0xDF;   // 25 --> 0x19
+  // uint32_t sns_fine     = 256;  //  182 --> 0xB6
+  // uint32_t n_samples    = 512;
+
+  // current_ch_3.setNumberOfSamples(n_samples, false);
+  // current_ch_3.setBypassNenable(true, false);
+
+  // current_ch_3.setCurrentAvgSelection(false, true);
+  // ThisThread::sleep_for(100ms);
+  // current_ch_3.setRMSavg(rms_avg_1, rms_avg_2, false);
+  // current_ch_3.setCurrentCoarseGain(course_gain, true);
+  // ThisThread::sleep_for(100ms);
+  // current_ch_3.setQvoFine(qvo_fine, false);
+  // current_ch_3.setSnsFine(sns_fine, false);
+  
+  // current_ch_3.getEEPROMSettings();
+  // current_ch_3.setPreDefineValue();
+
+  // read_SHADOW_Config_1G();
+  // current_ch_3.getShadowSettings();
+
+  // current_ch_3.calibrateSensor();
+
+  // current_ch_3.getFactorySettings();
+
+  // printf("----------------  Settings  ----------------\r\n");
+  // printf("N Samples       :   %ld\n", n_samples);
+  // printf("Course Gain     :   %ld\n", course_gain);
+  // printf("QVO FINE        :   %ld\n", qvo_fine);
+  // printf("SNS FINE        :   %ld\n", sns_fine);
+  // printf("RMS AVG 1       :   %ld\n", rms_avg_1);
+  // printf("--------------------------------------------\r\n");
+  // printf("When rms avg 1 : %ld\r\n", rms_avg_1);
 
   // qvo_chart(course_gain);
   // sns_chart(course_gain);

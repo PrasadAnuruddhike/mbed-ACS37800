@@ -397,7 +397,13 @@ class ACS37800
         ACS37800ERR setQvoFine(uint32_t qvo_fine, bool _eeprom = false);
         ACS37800ERR setSnsFine(uint32_t sns_fine, bool _eeprom = false);
 
-        void getFactorySettings();
+        ACS37800ERR setPreDefineValue();
+
+        void getEEPROMSettings();
+        void getShadowSettings();
+
+        void getCurrentAvgSecond();
+
         void calibrateSensor();
     
     private:
